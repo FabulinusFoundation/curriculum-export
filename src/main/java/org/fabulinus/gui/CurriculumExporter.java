@@ -17,7 +17,6 @@ import org.fabulinus.importing.Importer;
 import org.fabulinus.model.Content;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -55,11 +54,16 @@ public class CurriculumExporter extends Application implements ImportListener, F
         borderPane.setTop(fileChooserWidget);
         borderPane.setBottom(new VBox(progressBar, statusLabel));
 
-        Scene scene = new Scene(borderPane, 800, 600);
+        Scene scene = new Scene(borderPane, 600, 400);
         progressBar.prefWidthProperty().bind(scene.widthProperty());
         primaryStage.setScene(scene);
         safeSetIcon(primaryStage);
         primaryStage.setTitle("Curriculum Exporter");
+        primaryStage.setOnCloseRequest(handler -> {
+            if (!selectedContent.isEmpty()) {
+                showExportDialog();
+            }
+        });
         primaryStage.show();
     }
 
@@ -72,19 +76,11 @@ public class CurriculumExporter extends Application implements ImportListener, F
         }
     }
 
-    @Override
-    public void stop() throws Exception {
-        if (!selectedContent.isEmpty()) {
-            showExportDialog();
-        }
-        super.stop();
-    }
-
     private void showExportDialog(){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         safeSetIcon((Stage) alert.getDialogPane().getScene().getWindow());
         alert.setTitle("Save export");
-        alert.setHeaderText("Would you like to save the export?");
+        alert.setHeaderText("Would you like to save this curriculum?");
 
         ButtonType buttonYes = new ButtonType("Yes");
         ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -101,7 +97,7 @@ public class CurriculumExporter extends Application implements ImportListener, F
         try {
             String fileName = "export-" + new Date().getTime();
             File file = new File(System.getProperty("user.home") + File.separator + fileName);
-            FileWriter writer = new FileWriter(file, true);
+            FileWriter writer = new FileWriter(file);
             BufferedWriter out = new BufferedWriter(writer);
             for (Content content : selectedContent) {
                 out.append(content.description());
@@ -144,6 +140,7 @@ public class CurriculumExporter extends Application implements ImportListener, F
             fillContentView(item, child.getChildren());
             root.getChildren().add(item);
         }
+
         root.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 if (root.getChildren().isEmpty()) {
