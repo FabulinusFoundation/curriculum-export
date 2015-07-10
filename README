@@ -1,2 +1,0 @@
-#Installation
-Maven: mvn clean compile assembly:single
