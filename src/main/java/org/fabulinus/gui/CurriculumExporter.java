@@ -77,10 +77,14 @@ public class CurriculumExporter extends Application implements ImportListener, F
     }
 
     private void showExportDialog(){
+        String fileName = "export-" + new Date().getTime();
+        String path = System.getProperty("user.home") + File.separator + fileName;
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         safeSetIcon((Stage) alert.getDialogPane().getScene().getWindow());
         alert.setTitle("Save export");
         alert.setHeaderText("Would you like to save this curriculum?");
+        alert.setContentText(String.format("Path: %s", path));
 
         ButtonType buttonYes = new ButtonType("Yes");
         ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -89,14 +93,13 @@ public class CurriculumExporter extends Application implements ImportListener, F
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == buttonYes){
-            export();
+            export(path);
         }
     }
 
-    private void export(){
+    private void export(String path){
         try {
-            String fileName = "export-" + new Date().getTime();
-            File file = new File(System.getProperty("user.home") + File.separator + fileName);
+            File file = new File(path);
             FileWriter writer = new FileWriter(file);
             BufferedWriter out = new BufferedWriter(writer);
             for (Content content : selectedContent) {
