@@ -17,12 +17,14 @@ import org.fabulinus.importing.Importer;
 import org.fabulinus.model.Content;
 
 import java.io.*;
+import java.text.NumberFormat;
 import java.util.*;
 
 /**
  * Created by Timon on 06.07.2015.
  */
 public class CurriculumExporter extends Application implements ImportListener, FileSelectionListener {
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getPercentInstance();
     private final FileChooserWidget fileChooserWidget;
     private final TreeView<Content> contentView;
     private final ProgressBar progressBar;
@@ -84,7 +86,7 @@ public class CurriculumExporter extends Application implements ImportListener, F
         safeSetIcon((Stage) alert.getDialogPane().getScene().getWindow());
         alert.setTitle("Save export");
         alert.setHeaderText("Would you like to save this curriculum?");
-        alert.setContentText(String.format("Path: %s", path));
+        alert.setContentText(String.format("Path: '%s'", path));
 
         ButtonType buttonYes = new ButtonType("Yes");
         ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -116,12 +118,16 @@ public class CurriculumExporter extends Application implements ImportListener, F
     @Override
     public void onFileSelected(File file) {
         new Importer(file, this).start();
+        statusLabel.setText("Importing...");
     }
 
     @Override
     public void onProgress(double progress) {
         Platform.runLater(() -> {
             progressBar.setProgress(progress);
+            if (progress != -1) {
+                statusLabel.setText(NUMBER_FORMAT.format(progress));
+            }
         });
     }
 

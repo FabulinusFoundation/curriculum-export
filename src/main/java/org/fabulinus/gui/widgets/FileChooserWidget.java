@@ -3,6 +3,7 @@ package org.fabulinus.gui.widgets;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -28,13 +29,13 @@ public class FileChooserWidget extends BorderPane {
         fileChooser.setInitialDirectory(new File(path));
         setLayout();
         setOnBrowseButtonClick();
+        setOnTextFieldEnter();
     }
 
     private void setLayout(){
         setCenter(pathField);
         setRight(browseButton);
         setPadding(new Insets(5));
-        pathField.setEditable(false);
     }
 
     private void setOnBrowseButtonClick(){
@@ -43,6 +44,22 @@ public class FileChooserWidget extends BorderPane {
             if (selectedFile != null) {
                 pathField.setText(selectedFile.toString());
                 listener.onFileSelected(selectedFile);
+            } else {
+                listener.onError("No file selected.");
+            }
+        });
+    }
+
+    private void setOnTextFieldEnter(){
+        pathField.setOnKeyPressed(event -> {
+            if (KeyCode.ENTER.equals(event.getCode())){
+                String path = pathField.getText();
+                File file = new File(path);
+                if (file.exists()){
+                    listener.onFileSelected(file);
+                } else {
+                    listener.onError(String.format("File '%s' does not exist!", path));
+                }
             }
         });
     }
