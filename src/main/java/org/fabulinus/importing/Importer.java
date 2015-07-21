@@ -29,10 +29,10 @@ public class Importer extends Thread{
             fileInputStream = new FileInputStream(file);
             workbook = WorkbookFactory.create(fileInputStream);
             Sheet sheet = workbook.getSheetAt(0);
-            Content content = new Content("Content", null);
+            Content content = new Content("Content", null, 0);
             double size = sheet.getPhysicalNumberOfRows();
             for (int i = 1; i < size; i++) {
-                processRow(sheet.getRow(i), content);
+                processRow(sheet.getRow(i), content, i);
                 listener.onProgress(i/size);
             }
             listener.onImportDone(content);
@@ -47,13 +47,13 @@ public class Importer extends Thread{
         }
     }
 
-    private void processRow(Row row, Content root){
+    private void processRow(Row row, Content root, int rowNum){
         try {
             String topic = row.getCell(0).getStringCellValue();
             String subtopicA = row.getCell(1).getStringCellValue();
             String subtopicB = row.getCell(2).getStringCellValue();
             String subtopicC = row.getCell(3).getStringCellValue();
-            root.findOrCreate(topic, subtopicA, subtopicB, subtopicC);
+            root.findOrCreate(rowNum, topic, subtopicA, subtopicB, subtopicC);
         } catch (Exception e){
             listener.onError(e.getMessage());
         }

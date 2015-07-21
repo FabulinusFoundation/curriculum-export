@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.fabulinus.exporting.Exporter;
 import org.fabulinus.gui.widgets.FileChooserWidget;
 import org.fabulinus.gui.widgets.FileSelectionListener;
 import org.fabulinus.importing.ImportListener;
@@ -59,7 +60,7 @@ public class CurriculumExporter extends Application implements ImportListener, F
         Scene scene = new Scene(borderPane, 600, 400);
         progressBar.prefWidthProperty().bind(scene.widthProperty());
         primaryStage.setScene(scene);
-        safeSetIcon(primaryStage);
+        trySetIcon(primaryStage);
         primaryStage.setTitle("Curriculum Exporter");
         primaryStage.setOnCloseRequest(handler -> {
             if (!selectedContent.isEmpty()) {
@@ -69,7 +70,7 @@ public class CurriculumExporter extends Application implements ImportListener, F
         primaryStage.show();
     }
 
-    private void safeSetIcon(Stage stage){
+    private void trySetIcon(Stage stage){
         try {
             InputStream is = getClass().getResourceAsStream("/icon.gif");
             stage.getIcons().add(new Image(is));
@@ -83,7 +84,7 @@ public class CurriculumExporter extends Application implements ImportListener, F
         String path = System.getProperty("user.home") + File.separator + fileName;
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        safeSetIcon((Stage) alert.getDialogPane().getScene().getWindow());
+        trySetIcon((Stage) alert.getDialogPane().getScene().getWindow());
         alert.setTitle("Save export");
         alert.setHeaderText("Would you like to save this curriculum?");
         alert.setContentText(String.format("Path: '%s'", path));
@@ -100,17 +101,10 @@ public class CurriculumExporter extends Application implements ImportListener, F
     }
 
     private void export(String path){
+        Exporter exporter = new Exporter(new File(path), selectedContent);
         try {
-            File file = new File(path);
-            FileWriter writer = new FileWriter(file);
-            BufferedWriter out = new BufferedWriter(writer);
-            for (Content content : selectedContent) {
-                out.append(content.description());
-                out.newLine();
-            }
-            out.flush();
-            out.close();
-        } catch (IOException e){
+            exporter.start();
+        } catch (Exception e){
             onError("Could not export file! (" + e.getMessage() + ")");
         }
     }
